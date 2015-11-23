@@ -1,0 +1,8 @@
+bin/
+[Dd]ebug/
+[Rr]elease/
+*.dll
+*.exe
+*.pdb
+packages/
+*.conf
