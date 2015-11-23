@@ -25,7 +25,7 @@ namespace Telebot_Ebooks
                         {
                             DateTime msgTime = status.Message.Date;
                             Console.Write(msgTime.ToShortDateString() + " " + msgTime.ToShortTimeString() + " ");
-                            Console.Write("Message ID:" + status.Id + ". Chat ID: " + status.Message.From.Id + ". ");
+                            Console.Write("Message ID:" + status.Id + ". Chat ID: " + status.Message.Chat.Id + ". ");
                             Console.WriteLine(status.Message.From.FirstName + ": " + status.Message.Text);
                         }
                         Run.LastMessage = status.Id;

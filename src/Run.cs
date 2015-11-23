@@ -18,8 +18,11 @@ namespace Telebot_Ebooks
             Bot.Use = new Api(Twitter.TelegramKey);
             Random dice = new Random();
 
-            /* Only for testing */
-            LaunchArgs.Verbose = true;
+            if (args.Contains("-v"))
+            {
+                LaunchArgs.Verbose = true;
+            }
+            
             
             Thread exitWaitThread = new Thread(new ThreadStart(ExitThread.Check));
             exitWaitThread.Start();
@@ -41,7 +44,7 @@ namespace Telebot_Ebooks
             while (true)
             {
                 Thread.Sleep(1000);
-                Int32 time = 5; /* Default */
+                Int32 time = 15; /* Default */
                 if (DateTime.Now.Hour > 22 || DateTime.Now.Hour < 7)
                 {
                     time = 60;
@@ -59,8 +62,7 @@ namespace Telebot_Ebooks
                         TweetSharp.SendTweetOptions opts = new TweetSharp.SendTweetOptions();
                         opts.Status = tweet;
                         Twitter.Access.SendTweet(opts);
-                        Console.ReadKey(true);
-                        Bot.Use.SendTextMessage(LastChat, tweet);
+                        Bot.Use.SendTextMessage(-35276119, tweet);
                         LastSent = DateTime.Now;
                     }
                     catch (ArgumentException)
