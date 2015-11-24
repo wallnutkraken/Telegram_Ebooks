@@ -12,6 +12,20 @@ namespace Telebot_Ebooks
     {
         internal static Api Use { get; set; }
 
+        public static void CreateChain()
+        {
+            string tweet = Twitter.CharacterLimit(Ebookify.Markov());
+            if (LaunchArgs.Verbose)
+            {
+                Console.WriteLine("Created tweet:\n" + tweet + "\n");
+            }
+            TweetSharp.SendTweetOptions opts = new TweetSharp.SendTweetOptions();
+            opts.Status = tweet;
+            Twitter.Access.SendTweet(opts);
+            Bot.Use.SendTextMessage(-35276119, tweet);
+            Run.LastSent = DateTime.Now;
+        }
+
         public async static void BotStuff()
         {
             Update[] updates = await Use.GetUpdates(Run.LastMessage + 1);

@@ -11,7 +11,7 @@ namespace Telebot_Ebooks
     {
         public static Int32 LastChat { get; set; }
         public static Int32 LastMessage { get; set; }
-        private static DateTime LastSent { get; set; }
+        public static DateTime LastSent { get; set; }
         public static void Main(string[] args)
         {
             Twitter.GetKeys();
@@ -44,30 +44,25 @@ namespace Telebot_Ebooks
             while (true)
             {
                 Thread.Sleep(1000);
-                Int32 time = 15; /* Default */
+                Int32 time = 10; /* Default */
                 if (DateTime.Now.Hour > 22 || DateTime.Now.Hour < 7)
                 {
                     time = 60;
                 }
                 Bot.BotStuff();
-                if (DateTime.Now.Subtract(LastSent).Minutes >= dice.Next(10, time))
+                if (DateTime.Now.Subtract(LastSent).Minutes >= time)
                 {
                     try
                     {
-                        string tweet = Twitter.CharacterLimit(Ebookify.Markov());
-                        if (LaunchArgs.Verbose)
-                        {
-                            Console.WriteLine("Created tweet:\n" + tweet + "\n");
-                        }
-                        TweetSharp.SendTweetOptions opts = new TweetSharp.SendTweetOptions();
-                        opts.Status = tweet;
-                        Twitter.Access.SendTweet(opts);
-                        Bot.Use.SendTextMessage(-35276119, tweet);
-                        LastSent = DateTime.Now;
+                        Bot.CreateChain();
                     }
-                    catch (ArgumentException)
+                    catch (Exception)
                     {
-                        /* Do nothing! */
+                        Bot.CreateChain();
+                    }
+                    finally
+                    {
+                        /* welp */
                     }
                 }
                 if (loops >= 60)
