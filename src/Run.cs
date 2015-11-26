@@ -22,7 +22,10 @@ namespace Telebot_Ebooks
             {
                 LaunchArgs.Verbose = true;
             }
-            
+            if (args.Contains("-d"))
+            {
+                LaunchArgs.Debug = true;
+            }
             
             Thread exitWaitThread = new Thread(new ThreadStart(ExitThread.Check));
             exitWaitThread.Start();
@@ -40,7 +43,8 @@ namespace Telebot_Ebooks
             
             Twitter.Access = new TweetSharp.TwitterService(Twitter.AppKey.Token, Twitter.AppKey.TokenSecret);
             Twitter.Access.AuthenticateWith(Twitter.UserKey.Token, Twitter.UserKey.TokenSecret);
-            LastSent = DateTime.Now;
+            LastSent = DateTime.UtcNow;
+            int lup = 0;
             while (true)
             {
                 Thread.Sleep(1000);
@@ -50,19 +54,23 @@ namespace Telebot_Ebooks
                     time = 60;
                 }
                 Bot.BotStuff();
-                if (DateTime.Now.Subtract(LastSent).Minutes >= time)
+                if (DateTime.UtcNow.Subtract(LastSent).Minutes >= time)
                 {
+                    if (LaunchArgs.Debug)
+                    {
+                        Console.WriteLine(DateTime.UtcNow.Subtract(LastSent).Minutes + "  out of " + time);
+                    }
                     try
                     {
                         Bot.CreateChain();
+                        lup = 0;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        Bot.CreateChain();
-                    }
-                    finally
-                    {
-                        /* welp */
+                        string message = ex.Data + "\n";
+                        message = message + ex.Message;
+                        Bot.SendMessageToOwner(message);
+                        lup = time - 1;
                     }
                 }
                 if (loops >= 60)

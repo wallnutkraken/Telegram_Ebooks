@@ -9,5 +9,6 @@ namespace Telebot_Ebooks
     internal static class LaunchArgs
     {
         internal static bool Verbose { get; set; }
+        internal static bool Debug { get; set; }
     }
 }
