@@ -26,7 +26,7 @@ namespace Telebot_Ebooks
             {
                 LaunchArgs.Debug = true;
             }
-            
+
             Thread exitWaitThread = new Thread(new ThreadStart(ExitThread.Check));
             exitWaitThread.Start();
 
@@ -38,51 +38,55 @@ namespace Telebot_Ebooks
             {
                 Ebookify.ReadMarkovText();
             }
-            Int32 loops = 0;
 
-            
+
+
             Twitter.Access = new TweetSharp.TwitterService(Twitter.AppKey.Token, Twitter.AppKey.TokenSecret);
             Twitter.Access.AuthenticateWith(Twitter.UserKey.Token, Twitter.UserKey.TokenSecret);
             LastSent = DateTime.UtcNow;
-            int lup = 0;
+            Int32 loops = 0;
             while (true)
             {
-                Thread.Sleep(1000);
-                Int32 time = 10; /* Default */
-                if (DateTime.Now.Hour > 22 || DateTime.Now.Hour < 7)
+                try
                 {
-                    time = 60;
+                    loops = InsideRun(loops);
                 }
-                Bot.BotStuff();
-                if (DateTime.UtcNow.Subtract(LastSent).Minutes >= time)
+                catch (Exception ex)
                 {
-                    if (LaunchArgs.Debug)
-                    {
-                        Console.WriteLine(DateTime.UtcNow.Subtract(LastSent).Minutes + "  out of " + time);
-                    }
-                    try
-                    {
-                        Bot.CreateChain();
-                        lup = 0;
-                    }
-                    catch (Exception ex)
-                    {
-                        string message = ex.Data + "\n";
-                        message = message + ex.Message;
-                        Bot.SendMessageToOwner(message);
-                        lup = time - 1;
-                    }
-                }
-                if (loops >= 60)
-                {
-                    loops = 0;
-                    ExitThread.Save();
-                }
-                else
-                {
-                    loops++;
+                    string message = ex.Data + "\n";
+                    message = message + ex.Message;
+                    Bot.SendMessageToOwner(message);
                 }
             }
+        }
+
+        private static Int32 InsideRun(Int32 loops)
+        {
+            Thread.Sleep(1000);
+            Int32 time = 10; /* Default */
+            if (DateTime.Now.Hour > 22 || DateTime.Now.Hour < 7)
+            {
+                time = 60;
+            }
+            if (LaunchArgs.Debug)
+            {
+                Console.WriteLine(DateTime.UtcNow.Subtract(LastSent).Minutes + "  out of " + time);
+            }
+            Bot.BotStuff();
+            if (DateTime.UtcNow.Subtract(LastSent).Minutes >= time)
+            {
+                Bot.CreateChain();
+            }
+            if (loops >= 60)
+            {
+                loops = 0;
+                ExitThread.Save();
+            }
+            else
+            {
+                loops++;
+            }
+            return loops++;
         }
     }
 }

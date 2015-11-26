@@ -10,17 +10,10 @@ namespace Telebot_Ebooks
     {
         public static void Save()
         {
-            try
-            {
-                Ebookify.SaveMarkov();
-                string msg = Run.LastMessage + "";
-                string[] wr = { msg };
-                File.WriteAllLines("lastreadmessage", wr);
-            }
-            catch (Exception)
-            {
-
-            }
+            Ebookify.SaveMarkov();
+            string msg = Run.LastMessage + "";
+            string[] wr = { msg };
+            File.WriteAllLines("lastreadmessage", wr);
         }
         public static void Check()
         {
