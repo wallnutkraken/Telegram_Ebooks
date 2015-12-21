@@ -7,3 +7,4 @@ bin/
 packages/
 *.conf
 src/.vs/
+src/.vs/TelegramEbooks-Bot/v14/.suo
