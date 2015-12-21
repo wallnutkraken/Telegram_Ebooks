@@ -10,6 +10,7 @@ namespace TelegramEbooks_Bot
     {
         static void Main(string[] args)
         {
+            Arguments.SetUpArgs(args);
         }
     }
 }

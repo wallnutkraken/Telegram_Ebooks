@@ -6,3 +6,4 @@ bin/
 *.pdb
 packages/
 *.conf
+src/.vs/
