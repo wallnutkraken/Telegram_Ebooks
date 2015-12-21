@@ -19,5 +19,10 @@ namespace TelegramEbooks_Bot
         {
             Chain.LoadChainState(Convert.ToString(ChatID));
         }
+
+        public override string ToString()
+        {
+            return Convert.ToString(ChatID);
+        }
     }
 }
