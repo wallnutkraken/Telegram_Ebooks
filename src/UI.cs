@@ -51,7 +51,7 @@ namespace TelegramEbooks_Bot
                 }
                 else if (selection == 2)
                 {
-                    /* Reset settings */
+                    ResetSettings();
                 }
             }
         }
@@ -91,6 +91,12 @@ namespace TelegramEbooks_Bot
             Console.WriteLine("Are you sure you want to reset all settings? [Y/N]");
 
             char selection = YesNo();
+            if (selection == 'y')
+            {
+                Properties.Settings.Default.Reset();
+                Properties.Settings.Default.Save();
+            }
+            Environment.Exit(0);
         }
 
         private static void SetApiKey()
@@ -210,7 +216,7 @@ namespace TelegramEbooks_Bot
             SetSleepSetting();
             Properties.Settings.Default.Save();
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Bot setup complete!\n" + 
+            Console.WriteLine("Bot setup complete!\n" +
                 "Press any key to show main menu.");
             Console.ResetColor();
             Console.ReadKey(true);
