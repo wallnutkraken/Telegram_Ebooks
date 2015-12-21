@@ -62,12 +62,12 @@ namespace TelegramEbooks_Bot.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int SleepDuration {
+        public int SleepStartHour {
             get {
-                return ((int)(this["SleepDuration"]));
+                return ((int)(this["SleepStartHour"]));
             }
             set {
-                this["SleepDuration"] = value;
+                this["SleepStartHour"] = value;
             }
         }
         
@@ -104,6 +104,18 @@ namespace TelegramEbooks_Bot.Properties {
             }
             set {
                 this["RunOnly"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SleepDuration {
+            get {
+                return ((int)(this["SleepDuration"]));
+            }
+            set {
+                this["SleepDuration"] = value;
             }
         }
     }

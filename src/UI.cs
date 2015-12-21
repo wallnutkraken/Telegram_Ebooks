@@ -129,6 +129,57 @@ namespace TelegramEbooks_Bot
             Properties.Settings.Default.PostFrequency = postFreq;
         }
 
+        private static void SetSleepSetting()
+        {
+            Console.WriteLine("Do you want the bot to sleep? [Y/N]");
+            char selection;
+            do
+            {
+                selection = char.ToLower(Console.ReadKey(true).KeyChar);
+            } while (selection != 'y' && selection != 'n');
+            if (selection == 'n')
+            {
+                Properties.Settings.Default.UseSleepMode = false;
+            }
+            else
+            {
+                Properties.Settings.Default.UseSleepMode = true;
+                int sleepStart, sleepDur;
+                do
+                {
+                    Console.Clear();
+                    Console.WriteLine("At what hour do you want the bot to start sleeping? " +
+                        "(0-23)");
+                    try
+                    {
+                        sleepStart = int.Parse(Console.ReadLine());
+                    }
+                    catch (Exception)
+                    {
+                        sleepStart = 0;
+                    }
+                } while (sleepStart < 1 || sleepStart > 23);
+
+                do
+                {
+                    Console.Clear();
+                    Console.WriteLine("How many hours do you want the bot to sleep? " +
+                        "(0-23)");
+                    try
+                    {
+                        sleepDur = int.Parse(Console.ReadLine());
+                    }
+                    catch (Exception)
+                    {
+                        sleepDur = 0;
+                    }
+                } while (sleepDur < 1 || sleepDur > 23);
+
+                Properties.Settings.Default.SleepStartHour = sleepStart;
+                Properties.Settings.Default.SleepDuration = sleepDur;
+            }
+        }
+
         private static void FirstRun()
         {
             SetApiKey();
