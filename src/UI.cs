@@ -8,6 +8,19 @@ namespace TelegramEbooks_Bot
 {
     static class UI
     {
+        /// <summary>
+        /// Waits for user input until either a Y or N is pressed
+        /// </summary>
+        private static char YesNo()
+        {
+            char selection;
+            do
+            {
+                selection = char.ToLower(Console.ReadKey(true).KeyChar);
+            } while (selection != 'y' && selection != 'n');
+            return selection;
+        }
+
         public static void Screen()
         {
             if (Properties.Settings.Default.FirstRun)
@@ -31,7 +44,15 @@ namespace TelegramEbooks_Bot
                 Console.WriteLine("Welcome to TUSK Telegram Ebooks bot.");
                 Console.WriteLine("====================================\n");
                 int selection = MainMenu();
-                throw new NotImplementedException();
+
+                if (selection == 1)
+                {
+                    TgApi.InitTelegram();
+                }
+                else if (selection == 2)
+                {
+                    /* Reset settings */
+                }
             }
         }
 
@@ -64,6 +85,14 @@ namespace TelegramEbooks_Bot
             return selection;
         }
 
+        private static void ResetSettings()
+        {
+            Console.Clear();
+            Console.WriteLine("Are you sure you want to reset all settings? [Y/N]");
+
+            char selection = YesNo();
+        }
+
         private static void SetApiKey()
         {
             string apiKey;
@@ -76,11 +105,7 @@ namespace TelegramEbooks_Bot
                 Console.WriteLine("Is this key correct? [Y/N]");
                 Console.WriteLine(apiKey);
 
-                char selection;
-                do
-                {
-                    selection = char.ToLower(Console.ReadKey(true).KeyChar);
-                } while (selection != 'y' && selection != 'n');
+                char selection = YesNo();
 
                 if (selection == 'n')
                 {
@@ -132,11 +157,8 @@ namespace TelegramEbooks_Bot
         private static void SetSleepSetting()
         {
             Console.WriteLine("Do you want the bot to sleep? [Y/N]");
-            char selection;
-            do
-            {
-                selection = char.ToLower(Console.ReadKey(true).KeyChar);
-            } while (selection != 'y' && selection != 'n');
+            char selection = YesNo();
+
             if (selection == 'n')
             {
                 Properties.Settings.Default.UseSleepMode = false;
@@ -182,9 +204,19 @@ namespace TelegramEbooks_Bot
 
         private static void FirstRun()
         {
+            Properties.Settings.Default.FirstRun = false;
             SetApiKey();
             SetPostFrequency();
-            throw new NotImplementedException();
+            SetSleepSetting();
+            Properties.Settings.Default.Save();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Bot setup complete!\n" + 
+                "Press any key to show main menu.");
+            Console.ResetColor();
+            Console.ReadKey(true);
+
+            Console.Clear();
+            MainScreen();
         }
     }
 }
