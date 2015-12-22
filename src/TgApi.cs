@@ -87,7 +87,7 @@ namespace TelegramEbooks_Bot
                                     date = update.Message.Date.Value.ToShortTimeString() + " ";
                                 }
                                 Console.WriteLine(date +
-                                    update.Message.From.FirstName + ":" + 
+                                    update.Message.From.FirstName + ":" +
                                     update.Message.Text);
                             }
                             if (update.Message.Text.StartsWith("/") == false)
@@ -152,21 +152,47 @@ namespace TelegramEbooks_Bot
         /// </summary>
         private static void Post(object stateInfo)
         {
-            foreach (int key in ChatKeys)
+            bool isTimeToPost = true;
+            if (Properties.Settings.Default.UseSleepMode)
             {
-                IChat chat = Chats[key];
-                string chain = MarkovGenerator.Create(chat.Chain);
-                SendTgMessage(chat.ChatID, chain);
-                
-                if (Properties.Settings.Default.Verbose)
+                int endhour = GetEndHour();
+                if ((DateTime.UtcNow.Hour >= Properties.Settings.Default.SleepStartHour && 
+                    DateTime.UtcNow.Hour <= endhour) ||
+                    (DateTime.UtcNow.Hour <= endhour && DateTime.UtcNow.Hour >= 
+                    Properties.Settings.Default.SleepStartHour))
                 {
-                    Console.WriteLine("Posted to chat: " + chat.ChatID + ". " + chain);
+                    isTimeToPost = false;
+                }
+            }
+            if (isTimeToPost)
+            {
+                foreach (int key in ChatKeys)
+                {
+                    IChat chat = Chats[key];
+                    string chain = MarkovGenerator.Create(chat.Chain);
+                    SendTgMessage(chat.ChatID, chain);
+
+                    if (Properties.Settings.Default.Verbose)
+                    {
+                        Console.WriteLine("Posted to chat: " + chat.ChatID + ". " + chain);
+                    }
                 }
             }
             if (ChatKeys.Count > 0)
             {
                 SaveStuff();
             }
+        }
+
+        private static int GetEndHour()
+        {
+            int hour = Properties.Settings.Default.SleepStartHour;
+            hour += Properties.Settings.Default.SleepDuration;
+            if (hour > 23)
+            {
+                hour = hour - 24;
+            }
+            return hour;
         }
 
         internal static void InitTelegram()
