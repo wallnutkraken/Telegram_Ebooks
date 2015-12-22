@@ -8,7 +8,18 @@ namespace TelegramEbooks_Bot
 {
     class Chat : IChat
     {
-        public int ChatID { get; set; }
+        private int _ChatID;
+        public int ChatID
+        {
+            get
+            {
+                return _ChatID;
+            }
+        }
+        public Chat(int chatID)
+        {
+            _ChatID = chatID;
+        }
         public Markov Chain { get; set; }
         public void Save()
         {

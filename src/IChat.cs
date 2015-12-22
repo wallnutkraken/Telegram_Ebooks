@@ -5,7 +5,7 @@ namespace TelegramEbooks_Bot
 {
     interface IChat
     {
-        int ChatID { get; set; }
+        int ChatID { get; }
         Markov Chain { get; set; }
     }
 }
