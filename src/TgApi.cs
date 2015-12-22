@@ -43,16 +43,44 @@ namespace TelegramEbooks_Bot
             {
                 if (update.Message.Text != "")
                 {
-                    if (Chats.ContainsKey(update.Message.From.Id))
+                    if (update.Message.Text.StartsWith("/") == false)
                     {
-                        Chats[update.Message.From.Id].Chain.Feed(update.Message.Text);
+                        if (ChatKeys.Contains(update.Message.From.Id))
+                        {
+                            Chats[update.Message.From.Id].Chain.Feed(update.Message.Text);
+                        }
                     }
                     else
                     {
-                        Chat newChat = new Chat(update.Message.From.Id);
-                        newChat.Chain.Feed(update.Message.Text);
-                        Chats.Add(newChat.ChatID, newChat);
-                        ChatKeys.Add(newChat.ChatID);
+                        if (update.Message.Text.ToLower().StartsWith("/subscribe"))
+                        {
+                            if (ChatKeys.Contains(update.Message.From.Id) == false)
+                            {
+                                Chat subscriber = new Chat(update.Message.From.Id);
+                                Chats.Add(subscriber.ChatID, subscriber);
+                                ChatKeys.Add(subscriber.ChatID);
+                                await TgAccess.SendTextMessage(update.Message.From.Id, "Congrats! You are now " +
+                                    "subscribed to my wisdom!");
+                            }
+                            else
+                            {
+                                await TgAccess.SendTextMessage(update.Message.From.Id, "Chat already subscribed.");
+                            }
+                        }
+                        else if (update.Message.Text.ToLower().StartsWith("/unsubscribe"))
+                        {
+                            if (ChatKeys.Contains(update.Message.From.Id))
+                            {
+                                ChatKeys.Remove(update.Message.From.Id);
+                                Chats.Remove(update.Message.From.Id);
+                                await TgAccess.SendTextMessage(update.Message.From.Id, "This chat has successfuly been unsubscribed.");
+                            }
+                            else
+                            {
+                                await TgAccess.SendTextMessage(update.Message.From.Id, "Chat is not subsrcibed to begin with!\n" +
+                                    "...How dare you!");
+                            }
+                        }
                     }
                 }
             }
