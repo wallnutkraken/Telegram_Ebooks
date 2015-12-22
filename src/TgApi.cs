@@ -79,6 +79,17 @@ namespace TelegramEbooks_Bot
                     {
                         if (update.Message.Text != "" && update.Message.Text != null)
                         {
+                            if (Properties.Settings.Default.Verbose)
+                            {
+                                string date = "";
+                                if (update.Message.Date.HasValue)
+                                {
+                                    date = update.Message.Date.Value.ToShortTimeString() + " ";
+                                }
+                                Console.WriteLine(date +
+                                    update.Message.From.FirstName + ":" + 
+                                    update.Message.Text);
+                            }
                             if (update.Message.Text.StartsWith("/") == false)
                             {
                                 if (ChatKeys.Contains(update.Message.Chat.Id))
@@ -144,8 +155,13 @@ namespace TelegramEbooks_Bot
             foreach (int key in ChatKeys)
             {
                 IChat chat = Chats[key];
-                SendTgMessage(chat.ChatID,
-                    MarkovGenerator.Create(chat.Chain));
+                string chain = MarkovGenerator.Create(chat.Chain);
+                SendTgMessage(chat.ChatID, chain);
+                
+                if (Properties.Settings.Default.Verbose)
+                {
+                    Console.WriteLine("Posted to chat: " + chat.ChatID + ". " + chain);
+                }
             }
             if (ChatKeys.Count > 0)
             {
