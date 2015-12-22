@@ -26,7 +26,14 @@ namespace TelegramEbooks_Bot
                     {
                         Chat readChat = new Chat(int.Parse(line));
                         ChatKeys.Add(readChat.ChatID);
-                        readChat.Load();
+                        try
+                        {
+                            readChat.Load();
+                        }
+                        catch (Exception)
+                        {
+                            readChat.Chain = new Markov();
+                        }
                         Chats.Add(readChat.ChatID, readChat);
                     }
                     catch (Exception)
@@ -74,40 +81,48 @@ namespace TelegramEbooks_Bot
                         {
                             if (update.Message.Text.StartsWith("/") == false)
                             {
-                                if (ChatKeys.Contains(update.Message.From.Id))
+                                if (ChatKeys.Contains(update.Message.Chat.Id))
                                 {
-                                    Chats[update.Message.From.Id].Chain.Feed(update.Message.Text);
+                                    Chats[update.Message.Chat.Id].Chain.Feed(update.Message.Text);
                                 }
                             }
                             else
                             {
                                 if (update.Message.Text.ToLower().StartsWith("/subscribe"))
                                 {
-                                    if (ChatKeys.Contains(update.Message.From.Id) == false)
+                                    if (ChatKeys.Contains(update.Message.Chat.Id) == false)
                                     {
-                                        Chat subscriber = new Chat(update.Message.From.Id);
+                                        Chat subscriber = new Chat(update.Message.Chat.Id);
+                                        try
+                                        {
+                                            subscriber.Load();
+                                        }
+                                        catch (Exception)
+                                        {
+                                            subscriber.Chain = new Markov();
+                                        }
                                         Chats.Add(subscriber.ChatID, subscriber);
                                         ChatKeys.Add(subscriber.ChatID);
 
-                                        SendTgMessage(update.Message.From.Id, "Congrats! You are now " +
+                                        SendTgMessage(update.Message.Chat.Id, "Congrats! You are now " +
                                             "subscribed to my wisdom!");
                                     }
                                     else
                                     {
-                                        SendTgMessage(update.Message.From.Id, "Chat already subscribed.");
+                                        SendTgMessage(update.Message.Chat.Id, "Chat already subscribed.");
                                     }
                                 }
                                 else if (update.Message.Text.ToLower().StartsWith("/unsubscribe"))
                                 {
-                                    if (ChatKeys.Contains(update.Message.From.Id))
+                                    if (ChatKeys.Contains(update.Message.Chat.Id))
                                     {
-                                        ChatKeys.Remove(update.Message.From.Id);
-                                        Chats.Remove(update.Message.From.Id);
-                                        SendTgMessage(update.Message.From.Id, "This chat has successfuly been unsubscribed.");
+                                        ChatKeys.Remove(update.Message.Chat.Id);
+                                        Chats.Remove(update.Message.Chat.Id);
+                                        SendTgMessage(update.Message.Chat.Id, "This chat has successfuly been unsubscribed.");
                                     }
                                     else
                                     {
-                                        SendTgMessage(update.Message.From.Id, "Chat is not subsrcibed to begin with!\n" +
+                                        SendTgMessage(update.Message.Chat.Id, "Chat is not subsrcibed to begin with!\n" +
                                             "...How dare you!");
                                     }
                                 }
@@ -115,7 +130,7 @@ namespace TelegramEbooks_Bot
                         }
                     }
                     Properties.Settings.Default.LastReadMessage =
-                    updates[updates.Count - 1].UpdateId;
+                    updates[updates.Count - 1].UpdateId + 1;
                     Properties.Settings.Default.Save();
                 }
             }

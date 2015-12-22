@@ -95,6 +95,10 @@ namespace TelegramEbooks_Bot
             {
                 Properties.Settings.Default.Reset();
                 Properties.Settings.Default.Save();
+                if (System.IO.File.Exists("chat.list"))
+                {
+                    System.IO.File.Delete("chat.list");
+                }
             }
             Environment.Exit(0);
         }
