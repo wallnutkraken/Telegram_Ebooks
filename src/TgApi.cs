@@ -10,14 +10,14 @@ namespace TelegramEbooks_Bot
     static class TgApi
     {
         private static Api TgAccess;
-        private static Dictionary<int, IChat> Chats = new Dictionary<int, IChat>();
+        private static Dictionary<int, Chat> Chats = new Dictionary<int, Chat>();
         private static List<int> ChatKeys = new List<int>();
         private static void ReadChats()
         {
             string[] chatIds;
-            if (System.IO.File.Exists("chat.list"))
+            chatIds = System.IO.File.ReadAllLines("chat.list");
+            if (chatIds.Length > 0)
             {
-                chatIds = System.IO.File.ReadAllLines("chat.list");
                 foreach (string line in chatIds)
                 {
                     try
@@ -33,6 +33,18 @@ namespace TelegramEbooks_Bot
                     }
                 }
             }
+        }
+
+        private static void SaveStuff()
+        {
+            List<string> chatKeys = new List<string>();
+            foreach (int key in ChatKeys)
+            {
+                chatKeys.Add(key + "");
+                Chats[key].Save();
+            }
+
+            System.IO.File.WriteAllLines("chat.list", chatKeys);
         }
 
         private async static void RecieveUpdates(object stateInfo)
@@ -100,19 +112,44 @@ namespace TelegramEbooks_Bot
                 await TgAccess.SendTextMessage(chat.ChatID,
                     MarkovGenerator.Create(chat.Chain));
             }
+            if (ChatKeys.Count > 0)
+            {
+                SaveStuff();
+            }
         }
 
         internal static void InitTelegram()
         {
             TgAccess = new Api(Properties.Settings.Default.APIKey);
+            if (System.IO.File.Exists("chat.list") == false)
+            {
+                System.IO.File.WriteAllLines("chat.list", new string[1]);
+            }
             ReadChats();
 
             TimerCallback updateCall = RecieveUpdates;
             Timer updateThread = new Timer(updateCall, null, 0, 3000);
 
+            Thread.Sleep(1000);
+
             TimerCallback postCall = Post;
             Timer postThread = new Timer(postCall, null, 0,
                 (60 * 1000) * Properties.Settings.Default.PostFrequency);
+
+            char selection;
+            Console.WriteLine("Bot running. Please press 'q' to quit");
+            do
+            {
+                selection = char.ToLower(Console.ReadKey(true).KeyChar);
+            } while (selection != 'q');
+            Exit();
+        }
+
+
+        private static void Exit()
+        {
+            SaveStuff();
+            Environment.Exit(0);
         }
     }
 }
