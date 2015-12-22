@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Telegram.Bot;
-using Telegram.Bot.Types;
+using TeleBotDotNet;
+using TeleBotDotNet.Requests.Methods;
+using TeleBotDotNet.Responses.Methods;
+using TeleBotDotNet.Responses.Types;
 using System.Threading;
 using ClutteredMarkov;
 
@@ -9,7 +11,7 @@ namespace TelegramEbooks_Bot
 {
     static class TgApi
     {
-        private static Api TgAccess;
+        private static TeleBot ApiAccess;
         private static Dictionary<int, Chat> Chats = new Dictionary<int, Chat>();
         private static List<int> ChatKeys = new List<int>();
         private static void ReadChats()
@@ -47,69 +49,87 @@ namespace TelegramEbooks_Bot
             System.IO.File.WriteAllLines("chat.list", chatKeys);
         }
 
-        private async static void RecieveUpdates(object stateInfo)
+        private static void SendTgMessage(int chatId, string text)
         {
-            Update[] updates = await TgAccess.GetUpdates(
-                Properties.Settings.Default.LastReadMessage);
-            foreach (Update update in updates)
+            SendMessageRequest message = new SendMessageRequest();
+            message.ChatId = chatId;
+            message.Text = text;
+            ApiAccess.SendMessage(message);
+        }
+
+        private static void RecieveUpdates(object stateInfo)
+        {
+            GetUpdatesRequest updateOpts = new GetUpdatesRequest();
+            updateOpts.Offset = Properties.Settings.Default.LastReadMessage;
+            GetUpdatesResponse response = ApiAccess.GetUpdates(updateOpts);
+            List<UpdateResponse> updates = response.Result;
+
+            if (response.Ok)
             {
-                if (update.Message.Text != "")
+                if (updates.Count > 0)
                 {
-                    if (update.Message.Text.StartsWith("/") == false)
+                    foreach (UpdateResponse update in updates)
                     {
-                        if (ChatKeys.Contains(update.Message.From.Id))
+                        if (update.Message.Text != "" && update.Message.Text != null)
                         {
-                            Chats[update.Message.From.Id].Chain.Feed(update.Message.Text);
-                        }
-                    }
-                    else
-                    {
-                        if (update.Message.Text.ToLower().StartsWith("/subscribe"))
-                        {
-                            if (ChatKeys.Contains(update.Message.From.Id) == false)
+                            if (update.Message.Text.StartsWith("/") == false)
                             {
-                                Chat subscriber = new Chat(update.Message.From.Id);
-                                Chats.Add(subscriber.ChatID, subscriber);
-                                ChatKeys.Add(subscriber.ChatID);
-                                await TgAccess.SendTextMessage(update.Message.From.Id, "Congrats! You are now " +
-                                    "subscribed to my wisdom!");
+                                if (ChatKeys.Contains(update.Message.From.Id))
+                                {
+                                    Chats[update.Message.From.Id].Chain.Feed(update.Message.Text);
+                                }
                             }
                             else
                             {
-                                await TgAccess.SendTextMessage(update.Message.From.Id, "Chat already subscribed.");
-                            }
-                        }
-                        else if (update.Message.Text.ToLower().StartsWith("/unsubscribe"))
-                        {
-                            if (ChatKeys.Contains(update.Message.From.Id))
-                            {
-                                ChatKeys.Remove(update.Message.From.Id);
-                                Chats.Remove(update.Message.From.Id);
-                                await TgAccess.SendTextMessage(update.Message.From.Id, "This chat has successfuly been unsubscribed.");
-                            }
-                            else
-                            {
-                                await TgAccess.SendTextMessage(update.Message.From.Id, "Chat is not subsrcibed to begin with!\n" +
-                                    "...How dare you!");
+                                if (update.Message.Text.ToLower().StartsWith("/subscribe"))
+                                {
+                                    if (ChatKeys.Contains(update.Message.From.Id) == false)
+                                    {
+                                        Chat subscriber = new Chat(update.Message.From.Id);
+                                        Chats.Add(subscriber.ChatID, subscriber);
+                                        ChatKeys.Add(subscriber.ChatID);
+
+                                        SendTgMessage(update.Message.From.Id, "Congrats! You are now " +
+                                            "subscribed to my wisdom!");
+                                    }
+                                    else
+                                    {
+                                        SendTgMessage(update.Message.From.Id, "Chat already subscribed.");
+                                    }
+                                }
+                                else if (update.Message.Text.ToLower().StartsWith("/unsubscribe"))
+                                {
+                                    if (ChatKeys.Contains(update.Message.From.Id))
+                                    {
+                                        ChatKeys.Remove(update.Message.From.Id);
+                                        Chats.Remove(update.Message.From.Id);
+                                        SendTgMessage(update.Message.From.Id, "This chat has successfuly been unsubscribed.");
+                                    }
+                                    else
+                                    {
+                                        SendTgMessage(update.Message.From.Id, "Chat is not subsrcibed to begin with!\n" +
+                                            "...How dare you!");
+                                    }
+                                }
                             }
                         }
                     }
+                    Properties.Settings.Default.LastReadMessage =
+                    updates[updates.Count - 1].UpdateId;
+                    Properties.Settings.Default.Save();
                 }
             }
-            Properties.Settings.Default.LastReadMessage =
-                updates[updates.Length - 1].Id;
-            Properties.Settings.Default.Save();
         }
 
         /// <summary>
         /// Posts a markov chain to every chat that is subscribed
         /// </summary>
-        private static async void Post(object stateInfo)
+        private static void Post(object stateInfo)
         {
             foreach (int key in ChatKeys)
             {
                 IChat chat = Chats[key];
-                await TgAccess.SendTextMessage(chat.ChatID,
+                SendTgMessage(chat.ChatID,
                     MarkovGenerator.Create(chat.Chain));
             }
             if (ChatKeys.Count > 0)
@@ -120,7 +140,7 @@ namespace TelegramEbooks_Bot
 
         internal static void InitTelegram()
         {
-            TgAccess = new Api(Properties.Settings.Default.APIKey);
+            ApiAccess = new TeleBot(Properties.Settings.Default.APIKey);
             if (System.IO.File.Exists("chat.list") == false)
             {
                 System.IO.File.WriteAllLines("chat.list", new string[1]);
