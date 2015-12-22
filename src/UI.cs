@@ -130,14 +130,14 @@ namespace TelegramEbooks_Bot
             int postFreq = 0;
             do
             {
-                Console.Clear();
-                Console.WriteLine("Please set the post frequency for all chats.");
-                Console.WriteLine("In minutes.");
                 do
                 {
+                    Console.Clear();
+                    Console.WriteLine("Please set the post frequency for all chats.");
+                    Console.WriteLine("In minutes.");
                     try
                     {
-                        postFreq = int.Parse(Console.ReadKey(true).KeyChar + "");
+                        postFreq = int.Parse(Console.ReadLine());
                     }
                     catch (Exception)
                     {
