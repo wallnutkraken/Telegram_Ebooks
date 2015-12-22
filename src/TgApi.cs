@@ -56,8 +56,14 @@ namespace TelegramEbooks_Bot
                     }
                 }
             }
+            Properties.Settings.Default.LastReadMessage =
+                updates[updates.Length - 1].Id;
+            Properties.Settings.Default.Save();
         }
 
+        /// <summary>
+        /// Posts a markov chain to every chat that is subscribed
+        /// </summary>
         private static async void Post(object stateInfo)
         {
             foreach (int key in ChatKeys)
@@ -72,10 +78,13 @@ namespace TelegramEbooks_Bot
         {
             TgAccess = new Api(Properties.Settings.Default.APIKey);
             ReadChats();
+
             TimerCallback updateCall = RecieveUpdates;
             Timer updateThread = new Timer(updateCall, null, 0, 3000);
 
-            TimerCallback postCall = 
+            TimerCallback postCall = Post;
+            Timer postThread = new Timer(postCall, null, 0,
+                (60 * 1000) * Properties.Settings.Default.PostFrequency);
         }
     }
 }
